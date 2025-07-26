@@ -1,1 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Year in Moments</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+    
+    <!-- Three.js for 3D Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        /* --- Base Styles --- */
+        body {
+            color: #f0f0f0;
+            font-family: 'Lato', sans-serif;
+            overflow-x: hidden;
+            background-color: #050210; /* Dark base for 3D canvas */
+        }
+
+        .font-dancing-script {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        /* --- 3D Canvas Background --- */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+        }
+
+        /* --- Floating Images Animation --- */
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(-1deg); }
+            50% { transform: translateY(-20px) rotate(1deg); }
+            100% { transform: translateY(0px) rotate(-1deg); }
+        }
+        .floating-image {
+            animation: float 8s ease-in-out infinite;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- Timeline Styles --- */
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(to bottom, #fde68a, #d946ef, #10b981);
+            opacity: 0.2;
+            z-index: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .timeline-container::before {
+                left: 20px;
+            }
+        }
+        
+        .month-separator {
+            position: relative;
+            z-index: 10;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* --- Varied Card Animations --- */
+        .timeline-moment, .month-separator {
+            opacity: 0;
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .timeline-moment.is-visible, .month-separator.is-visible {
+            opacity: 1;
+            transform: none !important;
+        }
+        
+        /* Animation Styles */
+        .animate-fade-in-up { transform: translateY(80px); }
+        .animate-fade-in-down { transform: translateY(-80px); }
+        .animate-fade-in-left { transform: translateX(80px); }
+        .animate-fade-in-right { transform: translateX(-80px); }
+        .animate-zoom-in { transform: scale(0.8); }
+        .animate-rotate-in { transform: rotate(15deg) scale(0.8); }
+
+        /* --- Card Design & Color Palettes --- */
+        .card-design {
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+            color: white;
+            padding: 1rem;
+            transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .card-design:hover {
+            transform: scale(1.05) rotateZ(1deg);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 0 50px -10px rgba(255, 255, 255, 0.2);
+        }
+
+        .card-design .card-image {
+            border-radius: 0.5rem;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .card-design .card-date {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.5rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+        }
+
+        .card-design .card-caption {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .card-palette-1 { background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-palette-2 { background-image: linear-gradient(135deg, #ff8c42 0%, #ff3c83 100%); }
+        .card-palette-3 { background-image: linear-gradient(135deg, #38f9d7 0%, #43e97b 100%); }
+        .card-palette-4 { background-image: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+
+    </style>
+</head>
+<body class="antialiased">
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="relative z-10">
+        <header class="text-center py-16 md:py-24 px-4">
+            <h1 class="font-dancing-script text-5xl md:text-7xl text-white drop-shadow-lg">Our Year in Moments</h1>
+            <p class="mt-4 text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">A look back at every beautiful day with you.</p>
+        </header>
+
+        <section class="hidden md:block relative w-full h-80 mb-24 -mt-16">
+            <div class="absolute inset-0">
+                <div class="absolute top-[20%] left-[15%] w-48 floating-image" style="animation-delay: -2s;">
+                     <img src="images/1.jpg" alt="Favorite moment 1" class="rounded-lg transform -rotate-6 border-4 border-white">
+                </div>
+                <div class="absolute top-[10%] right-[18%] w-56 floating-image" style="animation-name: float-reverse; animation-delay: 0s;">
+                    <img src="images/2.jpg" alt="Favorite moment 2" class="rounded-lg transform rotate-3 border-4 border-white">
+                </div>
+                <div class="absolute bottom-[10%] left-[30%] w-40 floating-image" style="animation-name: float-reverse; animation-delay: -5s;">
+                    <img src="images/3.jpg" alt="Favorite moment 3" class="rounded-lg transform rotate-2 border-4 border-white">
+                </div>
+                <div class="absolute bottom-[15%] right-[35%] w-52 floating-image" style="animation-delay: -1s;">
+                    <img src="images/4.jpg" alt="Favorite moment 4" class="rounded-lg transform -rotate-2 border-4 border-white">
+                </div>
+            </div>
+        </section>
+
+        <div class="text-center text-amber-200 animate-bounce">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+            <p class="text-sm">Scroll to begin our journey</p>
+        </div>
+
+        <main>
+            <div id="timeline-container" class="relative container mx-auto px-4 py-12 timeline-container">
+                <!-- Timeline moments are generated here -->
+            </div>
+        </main>
+
+        <footer class="text-center py-16 px-4">
+            <div class="mb-8">
+                <audio id="our-song" src="https://assets.mixkit.co/music/preview/mixkit-serene-view-443.mp3" loop></audio>
+                <button id="play-pause-btn" class="bg-fuchsia-500/50 hover:bg-fuchsia-500/80 text-white rounded-full w-14 h-14 flex items-center justify-center mx-auto transition-all">
+                    <svg id="play-icon" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>
+                    <svg id="pause-icon" class="h-6 w-6 hidden" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+            <h2 class="font-dancing-script text-4xl md:text-5xl text-white">Here's to forever...</h2>
+            <p class="mt-3 text-gray-400">...and countless more moments to come.</p>
+        </footer>
+    </div>
+
+    <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50 hidden cursor-pointer">
+        <img id="lightbox-img" src="" alt="Enlarged moment" class="max-w-full max-h-full rounded-lg shadow-2xl">
+        <div id="lightbox-caption" class="absolute bottom-10 text-white text-xl font-dancing-script"></div>
+        <span class="absolute top-6 right-8 text-white text-5xl font-bold cursor-pointer">&times;</span>
+    </div>
+
+    <script>
+        /**
+         * 3D Glittering Background Setup
+         */
+        // This entire section is for the 3D background and can be left as is.
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 5000;
+        const posArray = new Float32Array(particlesCount * 3);
+        const colors = new Float32Array(particlesCount * 3);
+        const glitterColors = [new THREE.Color(0xfff0a3), new THREE.Color(0xff8f8f), new THREE.Color(0xa3d5ff), new THREE.Color(0xdaa5ff)];
+        for (let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 10;
+            const randomColor = glitterColors[Math.floor(Math.random() * glitterColors.length)];
+            colors[i] = randomColor.r;
+            colors[i + 1] = randomColor.g;
+            colors[i + 2] = randomColor.b;
+        }
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        const particlesMaterial = new THREE.PointsMaterial({ size: 0.015, vertexColors: true, transparent: true, blending: THREE.AdditiveBlending });
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+        camera.position.z = 5;
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (event) => { mouseX = event.clientX; mouseY = event.clientY; });
+        const clock = new THREE.Clock();
+        const animate = () => {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+            particlesMesh.rotation.y = -0.1 * elapsedTime;
+            if (mouseX > 0) {
+                const targetX = (mouseX / window.innerWidth - 0.5) * 2;
+                const targetY = -(mouseY / window.innerHeight - 0.5) * 2;
+                camera.position.x += (targetX - camera.position.x) * 0.02;
+                camera.position.y += (targetY - camera.position.y) * 0.02;
+            }
+            renderer.render(scene, camera);
+        };
+        animate();
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
+
+        /**
+         * Timeline and Page Logic
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            const timelineContainer = document.getElementById('timeline-container');
+            const startDate = new Date('2024-07-25T00:00:00');
+            const endDate = new Date('2025-07-25T00:00:00');
+            const formatDate = (date) => date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            const animations = ['animate-fade-in-up', 'animate-fade-in-left', 'animate-fade-in-right', 'animate-zoom-in', 'animate-rotate-in'];
+            const cardPalettes = ['card-palette-1', 'card-palette-2', 'card-palette-3', 'card-palette-4'];
+            
+            let currentDate = new Date(startDate);
+            let index = 0;
+            let lastMonth = -1;
+
+            while (currentDate <= endDate) {
+                const currentMonth = currentDate.getMonth();
+                if (currentMonth !== lastMonth) {
+                    const monthName = currentDate.toLocaleString('en-US', { month: 'long' });
+                    const year = currentDate.getFullYear();
+                    const separatorEl = document.createElement('div');
+                    separatorEl.className = 'month-separator my-16 text-center animate-fade-in-down';
+                    separatorEl.innerHTML = `<h3 class="font-dancing-script text-4xl text-amber-200">${monthName} ${year}</h3>`;
+                    timelineContainer.appendChild(separatorEl);
+                    lastMonth = currentMonth;
+                }
+                
+                const animationClass = animations[index % animations.length];
+                const paletteClass = cardPalettes[index % cardPalettes.length];
+                const isLeft = index % 2 === 0;
+                const formattedDate = formatDate(currentDate);
+                
+                // --- UPDATED: Image path logic ---
+                const imageNumber = index + 1;
+                const imagePath = `images/${imageNumber}.jpg`;
+
+                const momentWrapper = document.createElement('div');
+                momentWrapper.className = `timeline-moment mb-12 ${animationClass}`;
+                
+                const cardHTML = `
+                    <div class="card-design ${paletteClass}">
+                        <img src="${imagePath}" alt="Memory from ${formattedDate}" class="card-image w-full h-auto object-cover bg-gray-200 cursor-pointer timeline-image" onerror="this.onerror=null;this.src='https://placehold.co/600x600/e2e8f0/64748b?text=Image+${imageNumber}+Missing';">
+                        <div class="pt-4 text-center">
+                            <p class="card-date">${formattedDate}</p>
+                            <p class="card-caption mt-1">A beautiful memory from this day.</p>
+                        </div>
+                    </div>`;
+
+                const desktopEl = document.createElement('div');
+                desktopEl.className = `hidden md:flex justify-between items-center w-full ${isLeft ? 'flex-row-reverse' : ''}`;
+                desktopEl.innerHTML = `
+                    <div class="w-5/12"></div>
+                    <div class="z-20 flex items-center bg-gray-700 shadow-xl w-10 h-10 rounded-full"><div class="w-4 h-4 bg-amber-300 rounded-full mx-auto"></div></div>
+                    <div class="w-5/12">${cardHTML}</div>`;
+                
+                const mobileEl = document.createElement('div');
+                mobileEl.className = 'flex md:hidden justify-between items-center w-full';
+                mobileEl.innerHTML = `
+                    <div class="z-20 flex items-center bg-gray-700 shadow-xl w-10 h-10 rounded-full absolute left-0" style="margin-left: -3px;"><div class="w-4 h-4 bg-amber-300 rounded-full mx-auto"></div></div>
+                    <div class="w-full ml-12">${cardHTML}</div>`;
+
+                momentWrapper.appendChild(desktopEl);
+                momentWrapper.appendChild(mobileEl);
+                timelineContainer.appendChild(momentWrapper);
+
+                currentDate.setDate(currentDate.getDate() + 1);
+                index++;
+            }
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.timeline-moment, .month-separator').forEach(el => observer.observe(el));
+
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxCaption = document.getElementById('lightbox-caption');
+            timelineContainer.addEventListener('click', (e) => {
+                if (e.target && e.target.classList.contains('timeline-image')) {
+                    const dateText = e.target.closest('.card-design').querySelector('.card-date').textContent;
+                    lightboxImg.src = e.target.src;
+                    lightboxCaption.textContent = dateText;
+                    lightbox.classList.remove('hidden');
+                }
+            });
+            lightbox.addEventListener('click', () => lightbox.classList.add('hidden'));
+            
+            const playBtn = document.getElementById('play-pause-btn');
+            const audio = document.getElementById('our-song');
+            const playIcon = document.getElementById('play-icon');
+            const pauseIcon = document.getElementById('pause-icon');
+            playBtn.addEventListener('click', () => {
+                if (audio.paused) {
+                    audio.play().catch(e => console.error("Audio play failed:", e));
+                    playIcon.classList.add('hidden');
+                    pauseIcon.classList.remove('hidden');
+                } else {
+                    audio.pause();
+                    playIcon.classList.remove('hidden');
+                    pauseIcon.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
 
