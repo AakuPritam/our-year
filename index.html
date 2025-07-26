@@ -143,17 +143,18 @@
 
         <section class="hidden md:block relative w-full h-80 mb-24 -mt-16">
             <div class="absolute inset-0">
+                <!-- UPDATED PATHS -->
                 <div class="absolute top-[20%] left-[15%] w-48 floating-image" style="animation-delay: -2s;">
-                     <img src="images/1.jpg" alt="Favorite moment 1" class="rounded-lg transform -rotate-6 border-4 border-white">
+                     <img src="./images/1.jpg" alt="Favorite moment 1" class="rounded-lg transform -rotate-6 border-4 border-white">
                 </div>
                 <div class="absolute top-[10%] right-[18%] w-56 floating-image" style="animation-name: float-reverse; animation-delay: 0s;">
-                    <img src="images/2.jpg" alt="Favorite moment 2" class="rounded-lg transform rotate-3 border-4 border-white">
+                    <img src="./images/2.jpg" alt="Favorite moment 2" class="rounded-lg transform rotate-3 border-4 border-white">
                 </div>
                 <div class="absolute bottom-[10%] left-[30%] w-40 floating-image" style="animation-name: float-reverse; animation-delay: -5s;">
-                    <img src="images/3.jpg" alt="Favorite moment 3" class="rounded-lg transform rotate-2 border-4 border-white">
+                    <img src="./images/3.jpg" alt="Favorite moment 3" class="rounded-lg transform rotate-2 border-4 border-white">
                 </div>
                 <div class="absolute bottom-[15%] right-[35%] w-52 floating-image" style="animation-delay: -1s;">
-                    <img src="images/4.jpg" alt="Favorite moment 4" class="rounded-lg transform -rotate-2 border-4 border-white">
+                    <img src="./images/4.jpg" alt="Favorite moment 4" class="rounded-lg transform -rotate-2 border-4 border-white">
                 </div>
             </div>
         </section>
@@ -194,7 +195,6 @@
         /**
          * 3D Glittering Background Setup
          */
-        // This entire section is for the 3D background and can be left as is.
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
@@ -274,7 +274,8 @@
                 
                 // --- UPDATED: Image path logic ---
                 const imageNumber = index + 1;
-                const imagePath = `images/${imageNumber}.jpg`;
+                // The "./" tells the browser to look in the current directory, which works for GitHub Pages
+                const imagePath = `./images/${imageNumber}.jpg`;
 
                 const momentWrapper = document.createElement('div');
                 momentWrapper.className = `timeline-moment mb-12 ${animationClass}`;
@@ -353,4 +354,3 @@
 
 </body>
 </html>
-
